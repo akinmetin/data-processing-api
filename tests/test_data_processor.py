@@ -3,7 +3,7 @@ from unittest import TestCase
 
 class TestDataProcessor(TestCase):
     def setUp(self):
-        from data_processor import DataProcessor
+        from api.data_processor import DataProcessor
         self.data_processor = DataProcessor()
 
     def test_get_latest_day(self):
@@ -17,8 +17,8 @@ class TestDataProcessor(TestCase):
     def test_get_latest_day_3(self):
         output = self.data_processor.get_latest_day()
         self.assertEqual(list(output[0].keys()),
-                         ["Date", "Open", "High", "Low",
-                          "Close", "Adj Close", "Volume"])
+                         ["Date", "Open", "High", "Low", "Close",
+                          "Adj Close", "Volume", "Average"])
 
     def test_get_latest_day_average(self):
         output = self.data_processor.get_latest_day_average()
@@ -37,40 +37,49 @@ class TestDataProcessor(TestCase):
         self.assertEqual(list(output[0].keys()), ["Date", "Average"])
 
     def test_get_historical_data(self):
-        output = self.data_processor.get_historical_data("2021-05-19", "2021-05-28")
+        output = self.data_processor.get_historical_data(
+            "2021-05-19", "2021-05-28")
         self.assertTrue(type(output) is list)
 
     def test_get_historical_data_2(self):
-        output = self.data_processor.get_historical_data("2021-05-19", "2021-05-28")
+        output = self.data_processor.get_historical_data(
+            "2021-05-19", "2021-05-28")
         self.assertTrue(type(output[0]) is dict)
 
     def test_get_historical_data_3(self):
-        output = self.data_processor.get_historical_data("2021-05-19", "2021-05-28")
+        output = self.data_processor.get_historical_data(
+            "2021-05-19", "2021-05-28")
         self.assertEqual(len(output), 8)
 
     def test_get_historical_data_4(self):
-        output = self.data_processor.get_historical_data("2021-05-22", "2021-05-28")
-        self.assertIn('error', output)
+        with self.assertRaises(IndexError):
+            self.data_processor.get_historical_data(
+                "2021-05-22", "2021-05-28")
 
     def test_get_historical_data_average(self):
-        output = self.data_processor.get_historical_data_average("2021-05-20", "2021-05-24")
+        output = self.data_processor.get_historical_data_average(
+            "2021-05-20", "2021-05-24")
         self.assertTrue(type(output) is list)
 
     def test_get_historical_data_average_2(self):
-        output = self.data_processor.get_historical_data_average("2021-05-20", "2021-05-24")
+        output = self.data_processor.get_historical_data_average(
+            "2021-05-20", "2021-05-24")
         self.assertTrue(type(output[0]) is dict)
 
     def test_get_historical_data_average_3(self):
-        output = self.data_processor.get_historical_data_average("2021-05-20", "2021-05-24")
+        output = self.data_processor.get_historical_data_average(
+            "2021-05-20", "2021-05-24")
         self.assertEqual(len(output), 3)
 
     def test_get_historical_data_average_4(self):
-        output = self.data_processor.get_historical_data_average("2021-05-20", "2021-05-24")
+        output = self.data_processor.get_historical_data_average(
+            "2021-05-20", "2021-05-24")
         self.assertEqual(list(output[0].keys()), ["Date", "Average"])
 
     def test_get_historical_data_average_5(self):
-        output = self.data_processor.get_historical_data_average("2021-05-22", "2021-05-28")
-        self.assertIn('error', output)
+        with self.assertRaises(IndexError):
+            self.data_processor.get_historical_data_average(
+                "2021-05-22", "2021-05-28")
 
     def test_get_average_highest(self):
         output = self.data_processor.get_average_highest()
@@ -82,7 +91,6 @@ class TestDataProcessor(TestCase):
 
     def test_get_average_highest_3(self):
         output = self.data_processor.get_average_highest()
-
         self.assertEqual(list(output[0].keys()),
                          ["Date", "Open", "High", "Low",
                           "Close", "Adj Close", "Volume",

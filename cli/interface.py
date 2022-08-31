@@ -9,35 +9,32 @@ PARAMETER_REQUIRED_ENDPOINTS = ["historical", "historical/average"]
 
 
 def validate_inputs(endpoint: str, date_from: str, date_to: str):
+    ''' Validate CLI inputs '''
     if endpoint in ENDPOINTS:
         if endpoint in PARAMETER_REQUIRED_ENDPOINTS:
             if date_from is None or date_to is None:
-                click.echo("Please define the required parameters for this endpoint! For more info: `python interface.py --help`")
+                click.echo(
+                    "Please define the required parameters for this endpoint! "
+                    "For more info: `python interface.py --help`")
                 return False
-            else:
-                return True
-        else:
-            return True
-    else:
-        click.echo("Please define or check the endpoint. For more info: `python interface.py --help`")
+        return True
+    click.echo("Please define or check the endpoint. For more info: "
+               "`python interface.py --help`")
 
 
-def get_response(endpoint, date_from: str, date_to: str):
+def get_response(endpoint, date_from: str, date_to: str) -> dict:
+    url = 'http://127.0.0.1:5000/{}'.format(endpoint)
     if os.environ['API_STAGE'] == 'prod':
         url = 'https://metinakin.pythonanywhere.com/{}'.format(endpoint)
-    else:
-        url = 'http://127.0.0.1:5000/{}'.format(endpoint)
 
+    query_params = {}
     if date_from and date_to:
         query_params = {
             'from': date_from,
             'to': date_to,
         }
-    else:
-        query_params = {}
 
     response = requests.get(url, params=query_params)
-
     return response.json()
 
 
@@ -65,15 +62,15 @@ def main(endpoint, date_from, date_to):
     if validate_inputs(endpoint, date_from, date_to):
         results = get_response(endpoint, date_from, date_to)
 
-        if "error" in results:
+        if results.get("error"):
             click.echo(results["error"])
-        else:
-            for result in results:
-                for key, value in result.items():
-                    click.echo(str(key) + " " + str(value))
-                click.echo("------------------------")
-    else:
-        raise click.Abort()
+            raise click.Abort()
+
+        for result in results:
+            for key, value in result.items():
+                click.echo(str(key) + " " + str(value))
+            click.echo("------------------------")
+    raise click.Abort()
 
 
 if __name__ == "__main__":

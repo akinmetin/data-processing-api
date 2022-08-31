@@ -3,46 +3,40 @@ This module includes the Utils class that
 includes required functions for validation
 '''
 from datetime import datetime
-import logging
+import logging as _logging
 
-logging.basicConfig(format='%(asctime)s - [%(levelname)s] %(funcName)s - %(message)s',
-                    level='DEBUG')
-LOGGER = logging.getLogger(__name__)
+_logging.basicConfig(
+    format='%(asctime)s - [%(levelname)s] %(funcName)s - %(message)s',
+    level='DEBUG')
+LOGGER = _logging.getLogger(__name__)
 
 
-class Utils():
+def validate_date(date_from: str, date_to: str) -> bool:
     '''
-    This class includes the required validate_date() function
-    to validate endpoint date from and date to parameters
+    Takes date_from and date_to string parameters and returns
+    boolean `True` or `False` value regarding the result of validation
     '''
-    def __init__(self) -> None:
-        pass
+    if date_from is None or date_to is None:
+        LOGGER.warning("Unexpected type of date boundries: [%s, %s]",
+                       date_from, date_to)
+        return
 
-    def validate_date(self, date_from: str, date_to: str) -> bool:
-        '''
-        Takes date_from and date_to string parameters and returns
-        boolean `True` or `False` value regarding the result of validation
-        '''
-        if date_from is None or date_to is None:
-            LOGGER.warning("Unexpected type of date boundries!")
+    # length of the string date should be always 10, eg. "2021-04-19"
+    if len(date_from) != 10 or len(date_to) != 10:
+        return
+
+    try:
+        datetime_from = datetime.strptime(date_from, '%Y-%m-%d').timestamp()
+        datetime_to = datetime.strptime(date_to, '%Y-%m-%d').timestamp()
+
+        if datetime_from > datetime_to:
+            LOGGER.warning(
+                "Lower limit cannot be bigger than bigger limit: %f < %f",
+                datetime_from, datetime_to)
             return False
-
-        # length of the string date should be always 10, eg. "2021-04-19"
-        if len(date_from) == 10 and len(date_to) == 10:
-            try:
-                datetime_from = datetime.strptime(date_from, '%Y-%m-%d').timestamp()
-                datetime_to = datetime.strptime(date_to, '%Y-%m-%d').timestamp()
-
-                if datetime_from > datetime_to:
-                    LOGGER.warning("Lower limit cannot be bigger than bigger limit!")
-                    return False
-            except ValueError:
-                LOGGER.warning("Provided date format is not supported!")
-                return False
-            except Exception:
-                LOGGER.warning("Unhandled exception is occured!")
-                return False
-            return True
-
-        LOGGER.warning("Provided date format is not supported!")
-        return False
+        return True
+    except ValueError:
+        LOGGER.warning("Provided date format is not supported: %s or %s",
+                       date_from, date_to)
+    except Exception as exc:
+        LOGGER.warning("Unhandled exception is occured: %s", str(exc))

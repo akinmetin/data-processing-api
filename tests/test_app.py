@@ -3,7 +3,7 @@ from unittest import TestCase
 
 class TestAPI(TestCase):
     def setUp(self):
-        from app import create_app
+        from api.app import create_app
         app = create_app()
         app.testing = True
         self.app = app.test_client()
